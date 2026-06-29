@@ -228,12 +228,13 @@
 		int passes = _GodRaySteps;
 		float oneOverPasses = 1.0 / passes;
 		float rayLength = _GodRayLength * oneOverPasses;
+		godRayOffset *= rayLength;
 		float falloff = oneOverPasses;
 		float alphaACC = 0;
 		for( i = 0; i < passes; i++ ){
 			float alpha = 1.0 - ( falloff * i );
 			alphaACC += alpha;
-			Scene += tex2Dlod( _MainTex, float4( screenUV - godRayOffset * rayLength * i,0,0) ) * alpha;
+			Scene += tex2Dlod( _MainTex, float4( screenUV - godRayOffset * i,0,0) ) * alpha;
 		}
 		
 		Scene *= 1.0 / alphaACC;
@@ -254,12 +255,13 @@
 		int passes = _GodRaySteps;
 		float oneOverPasses = 1.0 / passes;
 		float rayLength = _GodRayLength * oneOverPasses * oneOverPasses * (rand + 1.0);
+		godRayOffset *= rayLength;
 		float falloff = oneOverPasses * oneOverPasses;
 		float alphaACC = 0;
 		for( i = 0; i <= passes; i++ ){
 			float alpha = 1.0 - ( falloff * i );
 			alphaACC += alpha;
-			Scene += tex2Dlod( _MainTex, float4( screenUV - godRayOffset * rayLength * i,0,0) );
+			Scene += tex2Dlod( _MainTex, float4( screenUV - godRayOffset * i,0,0) );
 		}
 		
 		Scene *= 1.0 / alphaACC;

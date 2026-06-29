@@ -26,6 +26,8 @@ public class GodRaysRendererFeature : ScriptableRendererFeature
 
     //When render feature object is enabled, set the shader
     private void OnEnable() {
+        Debug.Log("OnEnable");
+        
         settings.shader = Shader.Find("Hidden/PostProcess/GodRays");
         settings.shaderURP = Shader.Find("Hidden/PostProcess/GodRaysURP");
     }

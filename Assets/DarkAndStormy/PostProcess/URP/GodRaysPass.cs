@@ -68,8 +68,6 @@ public class GodRaysPass : ScriptableRenderPass
         material.SetVector(Properties._ViewDirTR, camera.transform.TransformVector(Vector3.Normalize(corners[2])) );
         material.SetVector(Properties._ViewDirBR, camera.transform.TransformVector(Vector3.Normalize(corners[3])) );
     }
-    
-    #if UNITY_6000_5_OR_NEWER
 
     private class GodRaysPassData
     {
@@ -182,110 +180,8 @@ public class GodRaysPass : ScriptableRenderPass
         }
         
     }
-    
-    /*
-    // Render Graph API
-    public override void RecordRenderGraph( RenderGraph renderGraph, ContextContainer frameData) {
-        
-        if (godRaysMaterialURP == null) {
-            Debug.LogError("No God Rays URP Material");
-            return;
-        }
 
-        UniversalResourceData resourcesData = frameData.Get<UniversalResourceData>();
-        UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
-        
-        //in case if the camera doesn't have the post process option enabled and if the camera is not the game's camera
-        if (cameraData.cameraType != CameraType.Game && (showInSceneView == false && cameraData.cameraType == CameraType.SceneView)) {
-            return;
-        }
-
-        VolumeStack stack = VolumeManager.instance.stack;
-        godRaysVolume = stack.GetComponent<GodRaysVolume>();
-        if (godRaysVolume == null) return;
-        
-        if (!godRaysVolume.IsActive()) return;
-        if( godRaysVolume.amount.value == 0f) return;
-        Light sunlight = RenderSettings.sun;
-        if (sunlight == null) return;
-        
-        // load the material settings from the volume
-        godRaysVolume.Load(godRaysMaterialURP);
-
-        var resourceData = frameData.Get<UniversalResourceData>();
-
-        TextureHandle source = resourceData.activeColorTexture;
-
-        var desc = renderGraph.GetTextureDesc(source);
-        desc.format = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16B16A16_SFloat;
-        desc.width /= 2;
-        desc.height /= 2;
-        desc.name = "Threshold";
-
-        TextureHandle thresholdTH = renderGraph.CreateTexture(desc);
-
-        desc.name = "ZoomBlur1";
-        desc.width /= 2;
-        desc.height /= 2;
-
-        TextureHandle zoom1TH = renderGraph.CreateTexture(desc);
-        
-        desc.name = "ZoomBlur2";
-        
-        TextureHandle zoom2TH = renderGraph.CreateTexture(desc);
-        
-        SetCameraProperties(godRaysMaterialURP, cameraData.camera, sunlight);
-
-        // Threshold the colors
-        RenderGraphUtils.BlitMaterialParameters threshold = new(source, thresholdTH, godRaysMaterialURP, 2);
-        renderGraph.AddBlitPass( threshold, "God Rays Threshold");
-        
-        // Radial Zoom BLur
-        renderGraph.AddBlitPass( new RenderGraphUtils.BlitMaterialParameters( thresholdTH, zoom1TH, godRaysMaterialURP, 3), "God Rays Zoom Blur First");
-        renderGraph.AddBlitPass( new RenderGraphUtils.BlitMaterialParameters( zoom1TH, zoom2TH, godRaysMaterialURP, 4), "God Rays Zoom Blur Second");
-
-        if (screenValues) {
-            desc = renderGraph.GetTextureDesc(source);
-            TextureHandle copyTH = renderGraph.CreateTexture(desc);
-
-            // Make a copy of the screen
-            renderGraph.AddBlitPass( new RenderGraphUtils.BlitMaterialParameters( source, copyTH, godRaysMaterialURP, 5), "Screen Copy");
-            
-            //godRaysMaterialURP.SetTexture(Properties._MainTex, copyTH);
-            
-            // Blit final result back to screen
-            //renderGraph.AddBlitPass( new RenderGraphUtils.BlitMaterialParameters( zoom2TH, source, godRaysMaterialURP, 1), "God Rays Screen Composite");
-            
-            // gotta do a roundabout way to use more than one texture
-            using (var builder = renderGraph.AddUnsafePass("God Rays Screen Composite", out CompositePassData passData)) {
-                
-                passData.source = zoom2TH;
-                passData.sceneTexture = copyTH;
-                passData.destination = source;
-                
-                builder.UseTexture(passData.source, AccessFlags.Read);
-                builder.UseTexture(passData.sceneTexture, AccessFlags.ReadWrite);
-                builder.UseTexture(passData.destination, AccessFlags.Write);
-                
-                builder.SetRenderFunc((CompositePassData data, UnsafeGraphContext context) =>
-                {
-                    var cmd = CommandBufferHelpers.GetNativeCommandBuffer(context.cmd);
-                    godRaysMaterialURP.SetTexture(Properties._MainTex, copyTH);
-                    //cmd.Blit(zoom2TH, source, godRaysMaterialURP, 1);
-                    Blitter.BlitCameraTexture(cmd, zoom2TH, source, godRaysMaterialURP, 1);
-                });
-            }
-
-        } else {
-            // Blit final result back to screen
-            renderGraph.AddBlitPass( new RenderGraphUtils.BlitMaterialParameters( zoom2TH, source, godRaysMaterialURP, 0), "God Rays Add Composite");
-        }
-        
-    }
-    */
-    #endif
-    
-    #if !UNITY_6000_5_OR_NEWER
+    #if !UNITY_6000_3_OR_NEWER
     
     // Compatibility Mode
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -364,7 +260,6 @@ public class GodRaysPass : ScriptableRenderPass
             cmd.ReleaseTemporaryRT(Properties._ThresholdRT);
             cmd.ReleaseTemporaryRT(Properties._Zoom1RT);
             cmd.ReleaseTemporaryRT(Properties._Zoom2RT);
-            
             
         }
     }
